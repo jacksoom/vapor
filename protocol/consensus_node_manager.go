@@ -90,23 +90,12 @@ func (c *Chain) getPrevRoundLastBlock(prevBlockHash *bc.Hash) (*types.BlockHeade
 	}
 
 	prevRoundBlockNum := blockHeader.Height - (blockHeader.Height % consensus.ActiveNetParams.RoundVoteBlockNums)
-	blockHashs, err := c.store.GetBlockHashesByHeight(prevRoundBlockNum)
+	preRoundBlock, err := c.GetBlockByHeight(prevRoundBlockNum)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, blockHash := range blockHashs {
-		prevBlockHeader, err := c.store.GetBlockHeader(blockHash)
-		if err != nil {
-			return nil, err
-		}
-
-		if prevBlockHeader.Height == prevRoundBlockNum {
-			return prevBlockHeader, nil
-		}
-	}
-
-	return nil, errNotFoundBlockNode
+	return &preRoundBlock.BlockHeader, nil
 }
 
 func (c *Chain) reorganizeConsensusResult(consensusResult *state.ConsensusResult, blockHeader *types.BlockHeader) error {
